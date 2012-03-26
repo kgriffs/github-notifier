@@ -1,0 +1,44 @@
+<html>
+<head><title>GitHub:Enterprise Notifier Options</title>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+<script type="text/javascript">
+
+// Saves options to localStorage.
+function save_options() {
+  localStorage.githubHost = $("#githubHost").val();
+
+  $("#status").text("Options saved");  
+  $("#status").show();
+  $("#status").fadeOut("slow");
+}
+
+// Restores select box state to saved value from localStorage.
+function restore_options() {
+  $("#githubHost").val(localStorage.githubHost);
+}
+
+$(document).ready(function() {
+  $("#save").click(function() {
+    save_options();
+    return false;
+  });
+
+  restore_options();
+});
+
+
+</script>
+</head>
+<body>
+  <h1>GitHub:Enterprise Notifier</h1>
+
+  <form>
+    <p>
+        <label for="githubHost">Host name: </label>
+        <input type="text" name="githubHost" id="githubHost" placeholder="github.example.com" />
+    </p>
+
+    <button id="save">Save</button> <span id="status"></span>
+  </form>
+</body>
+</html>
