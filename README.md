@@ -1,10 +1,11 @@
-GitHub Notifier is a Chrome extension for notifying you of pull requests, etc.
-
-On the first iteration, it will only support GitHub:Enterprise, since there are already extensions available that work with regular GitHub.
+A Chrome extension for notifying you of pull requests for GitHub:Enterprise, with support for organizations.
 
 TODO:
 
 * Add watch list to options page
+* Auto-detect orgs and repos
+  * Requires OAuth2 Token
 * Graceful handling of non-configured state
 * Display summary pull requests in pop-up
 * Support public GitHub URLs
+* Display toaster notifications with link to incoming pull requests (only if pull history initialized, so won't happen on browser startup)

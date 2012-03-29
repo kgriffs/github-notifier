@@ -1,48 +1,83 @@
-<html>
-<head>
-<style>
-body {
-  min-width:357px;
-  overflow-x:hidden;
-}
-
-img {
-  margin:5px;
-  border:2px solid black;
-  vertical-align:middle;
-  width:75px;
-  height:75px;
-}
-</style>
-
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+<script src="fancy-settings/source/lib/store.js"></script>
 <script>
 
-function processPulls(pulls) {
-  var badge_text = (pulls.length == 0 ? '' : pulls.length.toString());
+var MS_PER_DAY = 1000 * 60 * 60 * 24;
+
+var settings = new Store("settings", {
+  "enterprise_host": '',
+  "repos_to_watch": '',
+  "polling_interval_sec": 60
+});
+
+function processPulls(pulls_by_repo) {
+  var total_pulls = 0;
+  var found_old = false;
+
+  for (var repo_url in pulls_by_repo) {
+    pulls = pulls_by_repo[repo_url];
+
+    total_pulls += pulls.length;
+    for (var pull in pulls) {
+      var created_at = new Date(pull.created_at);
+      var elapsed_ms = Date.now() - created_at;
+      var elapsed_days = elapsed_ms / MS_PER_DAY;
+
+      if (elapsed_days > 1) {
+        found_old = true;
+      }
+    }    
+  }
+
+  if (found_old)
+  {
+    chrome.browserAction.setBadgeBackgroundColor({color:[0xC4, 0, 0x22, 255]});
+  }
+  else
+  {
+    chrome.browserAction.setBadgeBackgroundColor({color:[0x8F, 0xBC, 0x8F, 255]}); 
+  }
+
+  var badge_text = (total_pulls == 0 ? '' : total_pulls.toString());
   chrome.browserAction.setBadgeText({text: badge_text});
 }
 
-function fetchPullRequests(owner, repo, onResult) {
+function fetchPullRequests(repo_paths, onResult) {
+  fetchPullRequestsHelper(repo_paths, {}, onResult);
+}
+
+function fetchPullRequestsHelper(repo_paths, result, onResult) {
+  if (repo_paths.length == 0)
+  {
+    onResult(result)
+    return;
+  }
+
+  repo_path = repo_paths[repo_paths.length - 1];
+  if (repo_path[0] == '/')
+  {
+    repo_path = repo_path.substr(1);
+  }
+
+  pulls_url = "https://" + settings.get("enterprise_host") + '/api/v3/repos/' + repo_path + '/pulls'
+
   $.ajax({
-    url: "https://" + localStorage.githubHost + '/api/v3/repos/' + owner + '/' + repo + '/pulls',
-    success: onResult
+    url: pulls_url,
+    success: function(pulls) {
+      result[pulls_url] = pulls;
+      fetchPullRequestsHelper(repo_paths.slice(0, repo_paths.length - 1), result, onResult);
+    }
   });  
 }
 
 function think() {
-  fetchPullRequests("atl", "ds-agent", processPulls);  
-  setTimeout("think()", 1000 * 60);
+  fetchPullRequests(settings.get("repos_to_watch").split(";"), processPulls);  
+  setTimeout("think()", 1000 * settings.get("polling_interval_sec"));
 }
 
-$(document).ready(function() {
-  chrome.browserAction.setBadgeBackgroundColor({color:[0xC4, 0, 0x22, 255]});
+$(document).ready(function() {  
   think();  
 })
 
 
 </script>
-</head>
-<body>
-</body>
-</html>

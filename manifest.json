@@ -1,12 +1,12 @@
 {
-  "name": "GitHub:Enterprise Notifier",
+  "name": "GitHub:Enterprise Pull Request Notifier",
   "version": "0.1",
-  "description": "Notifications for GitHub:Enterprise",
+  "description": "Pull Request Notifications for GitHub:Enterprise",
   "browser_action": {
     "default_icon": "icon.png"
   },
 
-  "options_page": "options.html",
+  "options_page": "fancy-settings/source/index.html",
   "background_page": "background.html",
 
   "permissions": [
